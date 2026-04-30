@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProjETS — Club étudiant ÉTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --red: #C8102E;
+  --red-dk: #A00D25;
+  --red-a: rgba(200,16,46,.08);
+  --ink: #111111;
+  --paper: #FFFFFF;
+  --sand: #F5F3F0;
+  --mist: #ECEAE6;
+  --mid: #888888;
+  --border: #E0DDD8;
+
+  --pad-x: clamp(1.25rem, 5vw, 5rem);
+  --pad-section: clamp(3.5rem, 8vw, 7rem);
+  --r: 4px;
+
+  --h1: clamp(2.8rem, 7vw, 6.5rem);
+  --h2: clamp(1.8rem, 3.5vw, 3rem);
+  --h3: clamp(0.95rem, 1.5vw, 1.1rem);
+  --body: clamp(0.875rem, 1.4vw, 1rem);
+  --sm: clamp(0.75rem, 1.2vw, 0.875rem);
+  --xs: clamp(0.65rem, 1vw, 0.75rem);
+}
+
+/* ── RESET ── */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+body { font-family:'DM Sans',sans-serif; background:var(--paper); color:var(--ink); overflow-x:hidden; line-height:1.5; }
+img, svg { display:block; max-width:100%; }
+a { text-decoration:none; color:inherit; }
+button { font-family:inherit; cursor:pointer; }
+ul { list-style:none; }
+input, select, textarea { font-family:inherit; }
+
+/* ── PAGE ROUTER ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ── NAV ── */
+.nav {
+  position:fixed; top:0; left:0; right:0; z-index:999;
+  height:clamp(56px,8vh,68px);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 var(--pad-x);
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(1.2rem,2.5vw,1.5rem); letter-spacing:-.02em;
+  cursor:pointer; user-select:none;
+}
+.nav-logo b { color:var(--red); font-weight:800; }
+.nav-right { display:flex; align-items:center; gap:clamp(.75rem,2vw,2rem); }
+.nav-links { display:flex; align-items:center; gap:clamp(.75rem,2vw,2rem); }
+.nav-links a {
+  font-size:var(--sm); color:var(--mid); transition:color .2s; cursor:pointer;
+  white-space:nowrap;
+}
+.nav-links a:hover { color:var(--ink); }
+.nav-links .cta {
+  background:var(--red); color:#fff !important;
+  padding:.4rem 1rem; border-radius:var(--r); font-weight:500;
+  transition:background .2s;
+}
+.nav-links .cta:hover { background:var(--red-dk); }
+.lang {
+  font-family:'Syne',sans-serif; font-weight:700;
+  font-size:var(--xs); letter-spacing:.1em;
+  color:var(--mid); background:none; border:1px solid var(--border);
+  padding:.25rem .6rem; border-radius:2px; transition:all .2s;
+  white-space:nowrap;
+}
+.lang:hover { border-color:var(--red); color:var(--red); }
+/* hamburger */
+.burger {
+  display:none; background:none; border:none; padding:.25rem;
+  flex-direction:column; gap:5px;
+}
+.burger span {
+  display:block; width:22px; height:2px;
+  background:var(--ink); border-radius:2px;
+  transition:transform .25s, opacity .25s;
+}
+.burger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+.burger.open span:nth-child(2) { opacity:0; }
+.burger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+.mobile-menu {
+  display:none; position:fixed; inset:0; top:clamp(56px,8vh,68px);
+  background:var(--paper); z-index:998; padding:2rem var(--pad-x);
+  flex-direction:column; gap:1.5rem; border-top:1px solid var(--border);
+}
+.mobile-menu.open { display:flex; }
+.mobile-menu a {
+  font-size:1.1rem; color:var(--ink); padding:.75rem 0;
+  border-bottom:1px solid var(--mist); cursor:pointer;
+}
+.mobile-menu a.cta {
+  background:var(--red); color:#fff !important;
+  text-align:center; padding:.85rem; border-radius:var(--r);
+  border-bottom:none; font-weight:500;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height:100svh; padding:clamp(5rem,12vh,9rem) var(--pad-x) clamp(3rem,6vh,5rem);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  position:relative; overflow:hidden; background:var(--ink);
+}
+.hero-grid {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(200,16,46,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(200,16,46,.05) 1px,transparent 1px);
+  background-size:clamp(40px,6vw,72px) clamp(40px,6vw,72px);
+  mask-image:radial-gradient(ellipse 80% 70% at 35% 40%,black 20%,transparent 100%);
+}
+.hero-blade {
+  position:absolute; top:0; right:0; bottom:0;
+  width:clamp(30%,40vw,45%);
+  background:var(--red); opacity:.06;
+  clip-path:polygon(20% 0%,100% 0%,100% 100%,0% 100%);
+}
+.hero-tag {
+  font-family:'Syne',sans-serif; font-weight:700;
+  font-size:var(--xs); letter-spacing:.18em; text-transform:uppercase;
+  color:var(--red); margin-bottom:clamp(1.25rem,3vh,2rem);
+  display:flex; align-items:center; gap:.65rem;
+  animation:up .5s .1s both;
+}
+.hero-tag::before { content:''; display:block; width:clamp(18px,3vw,28px); height:1.5px; background:var(--red); flex-shrink:0; }
+.hero h1 {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:var(--h1); line-height:.92; letter-spacing:-.03em;
+  color:#fff; margin-bottom:clamp(1.25rem,3vh,2rem);
+  max-width:min(780px,90vw);
+  animation:up .5s .2s both;
+}
+.hero h1 .red { color:var(--red); }
+.hero-sub {
+  font-size:var(--body); font-weight:300; color:rgba(255,255,255,.45);
+  max-width:min(480px,90vw); line-height:1.8;
+  margin-bottom:clamp(2rem,4vh,3rem);
+  animation:up .5s .3s both;
+}
+.hero-btns {
+  display:flex; flex-wrap:wrap; gap:clamp(.75rem,2vw,1rem); align-items:center;
+  animation:up .5s .4s both;
+}
+.btn-primary {
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:var(--red); color:#fff;
+  padding:clamp(.7rem,.9vw,.9rem) clamp(1.1rem,2.5vw,2rem);
+  border:none; border-radius:var(--r); font-size:var(--sm); font-weight:500;
+  transition:background .2s, transform .15s; cursor:pointer;
+}
+.btn-primary:hover { background:var(--red-dk); transform:translateY(-2px); }
+.btn-ghost {
+  display:inline-flex; align-items:center; gap:.4rem;
+  color:rgba(255,255,255,.4); font-size:var(--sm);
+  transition:color .2s; cursor:pointer;
+}
+.btn-ghost:hover { color:rgba(255,255,255,.75); }
+.scroll-cue {
+  position:absolute; bottom:clamp(1.5rem,3vh,2.5rem); right:var(--pad-x);
+  display:flex; flex-direction:column; align-items:center; gap:.4rem;
+}
+.scroll-line { width:1px; height:clamp(32px,4vh,48px); background:linear-gradient(var(--red),transparent); animation:pulse 2s infinite; }
+.scroll-label { font-family:'Syne',sans-serif; font-size:.6rem; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.15); writing-mode:vertical-rl; }
+
+/* ── TICKER ── */
+.ticker { background:var(--red); padding:.6rem 0; overflow:hidden; white-space:nowrap; }
+.ticker-track { display:inline-flex; gap:clamp(2rem,5vw,5rem); animation:tick 22s linear infinite; }
+.ticker-track span { font-family:'Syne',sans-serif; font-weight:700; font-size:var(--xs); letter-spacing:.12em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+.ticker-track b { color:#fff; }
+
+/* ── SECTION BASE ── */
+.section { padding:var(--pad-section) var(--pad-x); }
+.section-sand { background:var(--sand); }
+.eyebrow {
+  font-family:'Syne',sans-serif; font-weight:700;
+  font-size:var(--xs); letter-spacing:.16em; text-transform:uppercase;
+  color:var(--red); margin-bottom:1.1rem;
+  display:flex; align-items:center; gap:.55rem;
+}
+.eyebrow::before { content:''; width:16px; height:1.5px; background:var(--red); display:block; flex-shrink:0; }
+.section-title { font-family:'Syne',sans-serif; font-weight:800; font-size:var(--h2); line-height:1.05; letter-spacing:-.025em; }
+
+/* ── MISSION ── */
+.mission-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));
+  gap:clamp(2rem,5vw,6rem);
+  align-items:start;
+  max-width:1200px;
+  margin-top:clamp(2rem,4vw,3.5rem);
+}
+.mission-copy p { font-size:var(--body); line-height:1.85; color:var(--mid); font-weight:300; margin-top:1rem; }
+.stats-2x2 {
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:1px; background:var(--border);
+  border:1px solid var(--border); border-radius:var(--r);
+  overflow:hidden; margin-top:clamp(1.5rem,3vw,2rem);
+}
+.stat-cell { background:var(--paper); padding:clamp(1rem,2vw,1.5rem); }
+.stat-n {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(1.5rem,3vw,2.2rem); color:var(--red);
+  line-height:1; letter-spacing:-.03em;
+}
+.stat-l { font-size:var(--xs); color:var(--mid); font-weight:300; margin-top:.25rem; }
+.callout {
+  background:var(--paper); border-left:3px solid var(--red);
+  border-radius:var(--r); padding:clamp(1.25rem,3vw,2rem);
+}
+.callout-lbl { font-family:'Syne',sans-serif; font-weight:700; font-size:var(--xs); letter-spacing:.14em; text-transform:uppercase; color:var(--red); margin-bottom:.7rem; }
+.callout p { font-size:var(--sm); line-height:1.85; color:var(--mid); font-weight:300; }
+
+/* ── HOW ── */
+.steps-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));
+  gap:1.5px; background:var(--border); border-radius:var(--r);
+  overflow:hidden; margin-top:clamp(2rem,4vw,3.5rem);
+}
+.step { background:var(--paper); padding:clamp(1.5rem,3vw,2.5rem); transition:background .2s; }
+.step:hover { background:var(--sand); }
+.step-n {
+  font-family:'Syne',sans-serif; font-weight:800;
+  font-size:clamp(2.5rem,5vw,3.5rem); color:var(--mist);
+  line-height:1; margin-bottom:1.1rem;
+  transition:color .2s; letter-spacing:-.04em;
+}
+.step:hover .step-n { color:var(--red); }
+.step h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:var(--h3); margin-bottom:.6rem; }
+.step p { font-size:var(--sm); line-height:1.75; color:var(--mid); font-weight:300; }
+.step-pill {
+  display:inline-block; margin-top:1.1rem;
+  background:var(--red-a); color:var(--red);
+  font-family:'Syne',sans-serif; font-weight:700;
+  font-size:var(--xs); letter-spacing:.1em; text-transform:uppercase;
+  padding:.25rem .65rem; border-radius:2px;
+}
+
+/* ── WHY ── */
+.why-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));
+  gap:clamp(1rem,2vw,1.5rem);
+  margin-top:clamp(2rem,4vw,3rem);
+  max-width:1000px;
+}
+.why-card {
+  background:var(--paper); border:1px solid var(--border); border-radius:var(--r);
+  padding:clamp(1.25rem,2.5vw,1.75rem); display:flex; gap:clamp(.75rem,2vw,1.25rem);
+  transition:border-color .2s, transform .2s;
+}
+.why-card:hover { border-color:var(--red); transform:translateY(-3px); }
+.wi {
+  width:clamp(28px,3.5vw,36px); height:clamp(28px,3.5vw,36px); flex-shrink:0;
+  background:var(--red); border-radius:3px;
+  display:flex; align-items:center; justify-content:center;
+}
+.wi svg { width:clamp(12px,1.5vw,16px); height:clamp(12px,1.5vw,16px); stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.why-card h3 { font-family:'Syne',sans-serif; font-weight:700; font-size:var(--sm); margin-bottom:.35rem; }
+.why-card p { font-size:var(--sm); line-height:1.75; color:var(--mid); font-weight:300; }
+
+/* ── JOIN ── */
+.join { background:var(--ink); }
+.join-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));
+  gap:clamp(2.5rem,6vw,6rem); align-items:start;
+  max-width:1000px;
+}
+.join .eyebrow { color:var(--red); }
+.join-title { font-family:'Syne',sans-serif; font-weight:800; font-size:var(--h2); line-height:1.05; letter-spacing:-.025em; color:#fff; margin-bottom:1.1rem; }
+.join-desc { font-size:var(--body); color:rgba(255,255,255,.38); line-height:1.85; font-weight:300; }
+
+/* ── FORMS ── */
+.form { display:flex; flex-direction:column; gap:clamp(.75rem,1.5vw,1rem); }
+.frow { display:grid; grid-template-columns:1fr 1fr; gap:clamp(.75rem,1.5vw,1rem); }
+@media(max-width:480px){ .frow{grid-template-columns:1fr;} }
+.fg { display:flex; flex-direction:column; gap:.3rem; }
+.fg label {
+  font-family:'Syne',sans-serif; font-weight:700;
+  font-size:var(--xs); letter-spacing:.12em; text-transform:uppercase;
+  color:rgba(255,255,255,.28);
+}
+.fg input,.fg select,.fg textarea {
+  background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+  color:#fff; padding:clamp(.65rem,1.2vw,.8rem) clamp(.75rem,1.5vw,1rem);
+  border-radius:var(--r); font-size:var(--sm); font-weight:300;
+  outline:none; transition:border-color .2s; appearance:none; resize:none;
+}
+.fg input::placeholder { color:rgba(255,255,255,.18); }
+.fg input:focus,.fg select:focus,.fg textarea:focus { border-color:var(--red); }
+.fg select option { background:#1a1a1a; color:#fff; }
+.fg textarea { height:clamp(80px,10vw,100px); }
+.fsub {
+  background:var(--red); color:#fff; border:none;
+  padding:clamp(.75rem,1.2vw,.9rem) clamp(1rem,2vw,1.5rem);
+  border-radius:var(--r); font-size:var(--sm); font-weight:500;
+  display:flex; align-items:center; justify-content:space-between;
+  gap:.5rem; transition:background .2s;
+}
+.fsub:hover { background:var(--red-dk); }
+.fnote { font-size:var(--xs); color:rgba(255,255,255,.2); line-height:1.6; }
+.fok { display:none; background:rgba(200,16,46,.12); border:1px solid rgba(200,16,46,.35); border-radius:var(--r); padding:.85rem 1rem; color:rgba(255,255,255,.65); font-size:var(--sm); line-height:1.6; }
+
+/* ── CONTACT PAGE ── */
+.ct-hero {
+  padding:clamp(5.5rem,12vh,10rem) var(--pad-x) clamp(2.5rem,5vh,4rem);
+  background:var(--ink);
+}
+.ct-hero h1 { font-family:'Syne',sans-serif; font-weight:800; font-size:var(--h1); line-height:.92; letter-spacing:-.03em; color:#fff; margin-top:1.25rem; }
+.ct-body { padding:var(--pad-section) var(--pad-x); background:var(--sand); }
+.ct-layout {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));
+  gap:clamp(2.5rem,6vw,6rem); max-width:1000px; align-items:start;
+}
+.ct-info-title { font-family:'Syne',sans-serif; font-weight:700; font-size:var(--h3); margin-bottom:.5rem; }
+.ct-info > p { font-size:var(--sm); color:var(--mid); font-weight:300; line-height:1.75; margin-bottom:clamp(1.5rem,3vw,2rem); }
+.ch {
+  display:flex; align-items:center; gap:clamp(.75rem,1.5vw,1.1rem);
+  padding:clamp(.9rem,1.8vw,1.2rem) clamp(1rem,2vw,1.5rem);
+  background:var(--paper); border:1px solid var(--border);
+  border-radius:var(--r); text-decoration:none; margin-bottom:.85rem;
+  transition:border-color .2s;
+}
+.ch:hover { border-color:var(--red); }
+.ch-ic { width:clamp(28px,3.5vw,34px); height:clamp(28px,3.5vw,34px); flex-shrink:0; background:var(--red-a); border-radius:3px; display:flex; align-items:center; justify-content:center; }
+.ch-ic svg { width:clamp(12px,1.5vw,15px); height:clamp(12px,1.5vw,15px); stroke:var(--red); fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.ch-lbl { font-size:var(--xs); color:var(--mid); font-weight:300; margin-bottom:2px; }
+.ch-val { font-size:var(--sm); font-weight:500; color:var(--ink); }
+.ct-form-box { background:var(--paper); border:1px solid var(--border); border-radius:var(--r); padding:clamp(1.5rem,3vw,2.25rem); }
+.ct-form-box .fg label { color:var(--mid); }
+.ct-form-box .fg input,.ct-form-box .fg select,.ct-form-box .fg textarea { background:var(--sand); border-color:var(--border); color:var(--ink); }
+.ct-form-box .fg input::placeholder { color:#bbb; }
+.ct-form-box .fg input:focus,.ct-form-box .fg select:focus,.ct-form-box .fg textarea:focus { border-color:var(--red); }
+.ct-form-box .fg select option { background:#fff; color:var(--ink); }
+.ct-form-box .fsub { width:100%; }
+.ct-form-box .fnote { color:var(--mid); }
+.ct-form-box .fok { background:rgba(200,16,46,.06); border-color:rgba(200,16,46,.2); color:var(--ink); }
+
+/* ── FOOTER ── */
+footer {
+  background:#080808; padding:clamp(1.25rem,3vh,1.75rem) var(--pad-x);
+  display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center;
+  gap:.75rem; border-top:1px solid rgba(255,255,255,.04);
+}
+.flogo { font-family:'Syne',sans-serif; font-weight:800; font-size:clamp(1rem,2vw,1.2rem); color:rgba(255,255,255,.3); letter-spacing:-.02em; }
+.flogo b { color:var(--red); }
+footer p { font-size:var(--xs); color:rgba(255,255,255,.18); }
+
+/* ── KEYFRAMES ── */
+@keyframes up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse { 0%,100%{opacity:.3} 50%{opacity:1} }
+@keyframes tick { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+/* ── RESPONSIVE NAV ── */
+@media(max-width:768px){
+  .nav-links { display:none; }
+  .burger { display:flex; }
+}
+@media(min-width:769px){
+  .mobile-menu { display:none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo" onclick="nav('home')">Proj<b>ETS</b></div>
+  <div class="nav-right">
+    <ul class="nav-links">
+      <li><a onclick="nav('home');later(()=>go('mission'))" data-fr="Mission" data-en="Mission">Mission</a></li>
+      <li><a onclick="nav('home');later(()=>go('how'))" data-fr="Fonctionnement" data-en="How it works">Fonctionnement</a></li>
+      <li><a onclick="nav('home');later(()=>go('why'))" data-fr="Pourquoi" data-en="Why">Pourquoi</a></li>
+      <li><a onclick="nav('contact')" data-fr="Contact" data-en="Contact">Contact</a></li>
+      <li><a class="cta" onclick="nav('home');later(()=>go('join'))" data-fr="Rejoindre" data-en="Join">Rejoindre</a></li>
+    </ul>
+    <button class="lang" onclick="toggleLang()">EN</button>
+    <button class="burger" id="burger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="nav('home');later(()=>go('mission'));closeMenu()" data-fr="Mission" data-en="Mission">Mission</a>
+  <a onclick="nav('home');later(()=>go('how'));closeMenu()" data-fr="Fonctionnement" data-en="How it works">Fonctionnement</a>
+  <a onclick="nav('home');later(()=>go('why'));closeMenu()" data-fr="Pourquoi" data-en="Why">Pourquoi</a>
+  <a onclick="nav('contact');closeMenu()" data-fr="Contact" data-en="Contact">Contact</a>
+  <a class="cta" onclick="nav('home');later(()=>go('join'));closeMenu()" data-fr="Rejoindre le club" data-en="Join the club">Rejoindre le club</a>
+</div>
+
+<!-- ═══════════ HOME ═══════════ -->
+<div class="page active" id="page-home">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-blade"></div>
+  <div class="hero-tag" data-fr="Club étudiant — ÉTS Montréal" data-en="Student Club — ÉTS Montréal">Club étudiant — ÉTS Montréal</div>
+  <h1 data-fr='Crée.<br><span class="red">Explore.</span><br>Apprends.' data-en='Build.<br><span class="red">Explore.</span><br>Learn.'>Crée.<br><span class="red">Explore.</span><br>Apprends.</h1>
+  <p class="hero-sub" data-fr="ProjETS est l'espace où les étudiants en génie expérimentent la création de projets concrets — sans la pression du PFE, sans rapport, sans note." data-en="ProjETS is the space where engineering students experience real project creation — without capstone pressure, no reports, no grades.">ProjETS est l'espace où les étudiants en génie expérimentent la création de projets concrets — sans la pression du PFE, sans rapport, sans note.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="later(()=>go('join'))" data-fr="Rejoindre le club" data-en="Join the club">Rejoindre le club <span>→</span></button>
+    <button class="btn-ghost" onclick="later(()=>go('how'))" data-fr="Comment ça fonctionne →" data-en="How it works →">Comment ça fonctionne →</button>
+  </div>
+  <div class="scroll-cue">
+    <div class="scroll-line"></div>
+    <span class="scroll-label" data-fr="défiler" data-en="scroll">défiler</span>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span><b data-fr="Idéation" data-en="Ideation">Idéation</b></span>
+    <span data-fr="Sprints de 4–6 semaines" data-en="4–6 week sprints">Sprints de 4–6 semaines</span>
+    <span><b data-fr="Zéro rapport" data-en="Zero report">Zéro rapport</b></span>
+    <span data-fr="Équipes multidisciplinaires" data-en="Multidisciplinary teams">Équipes multidisciplinaires</span>
+    <span><b>Génie+</b></span>
+    <span data-fr="LOG · MEC · ELE · GTI" data-en="LOG · MEC · ELE · GTI">LOG · MEC · ELE · GTI</span>
+    <span><b data-fr="Idéation" data-en="Ideation">Idéation</b></span>
+    <span data-fr="Sprints de 4–6 semaines" data-en="4–6 week sprints">Sprints de 4–6 semaines</span>
+    <span><b data-fr="Zéro rapport" data-en="Zero report">Zéro rapport</b></span>
+    <span data-fr="Équipes multidisciplinaires" data-en="Multidisciplinary teams">Équipes multidisciplinaires</span>
+    <span><b>Génie+</b></span>
+    <span data-fr="LOG · MEC · ELE · GTI" data-en="LOG · MEC · ELE · GTI">LOG · MEC · ELE · GTI</span>
+  </div>
+</div>
+
+<!-- MISSION -->
+<section class="section section-sand" id="mission">
+  <div class="eyebrow" data-fr="Notre mission" data-en="Our mission">Notre mission</div>
+  <div class="section-title" data-fr="L'expérience projet avant le PFE" data-en="Real project experience before the capstone">L'expérience projet avant le PFE</div>
+  <div class="mission-grid">
+    <div class="mission-copy">
+      <p data-fr="Chaque étudiant en génie à l'ÉTS arrive au PFE sans vraiment avoir vécu le processus de création de A à Z. ProjETS comble ce vide." data-en="Every engineering student at ÉTS reaches their capstone without truly having experienced the full creation process. ProjETS fills that gap.">Chaque étudiant en génie à l'ÉTS arrive au PFE sans vraiment avoir vécu le processus de création de A à Z. ProjETS comble ce vide.</p>
+      <p data-fr="On offre un terrain d'entraînement : des équipes multidisciplinaires, des défis concrets, et un environnement où l'erreur est bienvenue." data-en="We offer a training ground: multidisciplinary teams, real challenges, and an environment where failure is welcome.">On offre un terrain d'entraînement : des équipes multidisciplinaires, des défis concrets, et un environnement où l'erreur est bienvenue.</p>
+      <div class="stats-2x2">
+        <div class="stat-cell"><div class="stat-n">4–6</div><div class="stat-l" data-fr="semaines par sprint" data-en="weeks per sprint">semaines par sprint</div></div>
+        <div class="stat-cell"><div class="stat-n">0</div><div class="stat-l" data-fr="rapport obligatoire" data-en="mandatory report">rapport obligatoire</div></div>
+        <div class="stat-cell"><div class="stat-n">100%</div><div class="stat-l" data-fr="pratique réelle" data-en="hands-on">pratique réelle</div></div>
+        <div class="stat-cell"><div class="stat-n" style="font-size:clamp(1.1rem,2.2vw,1.5rem)">Génie+</div><div class="stat-l" data-fr="mention officielle" data-en="official distinction">mention officielle</div></div>
+      </div>
+    </div>
+    <div class="callout">
+      <div class="callout-lbl" data-fr="Le problème qu'on règle" data-en="The problem we solve">Le problème qu'on règle</div>
+      <p data-fr="Au PFE, tu dois gérer une équipe, concevoir une solution technique et livrer selon des normes professionnelles — souvent pour la première fois. ProjETS te prépare à tout ça dans un cadre sans conséquences académiques, pour que tu arrives au PFE avec de la confiance et de l'expérience réelle." data-en="At the capstone, you must manage a team, design a technical solution, and deliver to professional standards — often for the first time. ProjETS prepares you for all of this in a zero-stakes environment, so you arrive with real confidence and experience.">Au PFE, tu dois gérer une équipe, concevoir une solution technique et livrer selon des normes professionnelles — souvent pour la première fois. ProjETS te prépare à tout ça dans un cadre sans conséquences académiques, pour que tu arrives au PFE avec de la confiance et de l'expérience réelle.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="section" id="how">
+  <div class="eyebrow" data-fr="Fonctionnement" data-en="How it works">Fonctionnement</div>
+  <div class="section-title" data-fr="Trois étapes, une session" data-en="Three steps, one semester">Trois étapes, une session</div>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-n">01</div>
+      <h3 data-fr="Formation des équipes" data-en="Team formation">Formation des équipes</h3>
+      <p data-fr="En début de session, les membres se regroupent selon leurs intérêts et compétences. On encourage les équipes multidisciplinaires — logiciel, mécanique, électrique, GTI." data-en="At the start of the semester, members group up by interests and skills. We encourage cross-disciplinary teams — software, mechanical, electrical, IT.">En début de session, les membres se regroupent selon leurs intérêts et compétences. On encourage les équipes multidisciplinaires — logiciel, mécanique, électrique, GTI.</p>
+      <span class="step-pill" data-fr="Semaine 1–2" data-en="Week 1–2">Semaine 1–2</span>
+    </div>
+    <div class="step">
+      <div class="step-n">02</div>
+      <h3 data-fr="Sprint de création" data-en="Creation sprint">Sprint de création</h3>
+      <p data-fr="L'équipe définit un problème, propose une solution et la concrétise en 4 à 6 semaines. Pas de rapport imposé — du travail réel, itératif et collaboratif." data-en="The team defines a problem, proposes a solution and builds it over 4 to 6 weeks. No mandatory report — just real, iterative, collaborative work.">L'équipe définit un problème, propose une solution et la concrétise en 4 à 6 semaines. Pas de rapport imposé — du travail réel, itératif et collaboratif.</p>
+      <span class="step-pill" data-fr="Semaine 3–10" data-en="Week 3–10">Semaine 3–10</span>
+    </div>
+    <div class="step">
+      <div class="step-n">03</div>
+      <h3 data-fr="Pitch informel" data-en="Informal pitch">Pitch informel</h3>
+      <p data-fr="Chaque équipe présente son projet aux autres membres. Pas d'évaluation — juste un partage d'expérience. L'objectif est d'apprendre ensemble, pas de performer." data-en="Each team presents to the members. No evaluation — just sharing experience. The goal is learning together, not performing.">Chaque équipe présente son projet aux autres membres. Pas d'évaluation — juste un partage d'expérience. L'objectif est d'apprendre ensemble, pas de performer.</p>
+      <span class="step-pill" data-fr="Semaine 11–13" data-en="Week 11–13">Semaine 11–13</span>
+    </div>
+  </div>
+</section>
+
+<!-- WHY -->
+<section class="section section-sand" id="why">
+  <div class="eyebrow" data-fr="Pourquoi ProjETS" data-en="Why ProjETS">Pourquoi ProjETS</div>
+  <div class="section-title" data-fr="Ce que tu vas développer" data-en="What you'll develop">Ce que tu vas développer</div>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="wi"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+      <div><h3 data-fr="Idéation et conception" data-en="Ideation & design">Idéation et conception</h3><p data-fr="Transforme une idée floue en projet structuré avec des objectifs clairs et une portée réaliste." data-en="Turn a vague idea into a structured project with clear goals and a realistic scope.">Transforme une idée floue en projet structuré avec des objectifs clairs et une portée réaliste.</p></div>
+    </div>
+    <div class="why-card">
+      <div class="wi"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+      <div><h3 data-fr="Travail en équipe réel" data-en="Real teamwork">Travail en équipe réel</h3><p data-fr="Collabore avec des profils complémentaires et livre ensemble — des compétences que les cours n'enseignent pas." data-en="Collaborate with complementary profiles and deliver together — skills courses don't teach.">Collabore avec des profils complémentaires et livre ensemble — des compétences que les cours n'enseignent pas.</p></div>
+    </div>
+    <div class="why-card">
+      <div class="wi"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+      <div><h3 data-fr="Gestion de projet" data-en="Project management">Gestion de projet</h3><p data-fr="Planifie, priorise et livre dans un délai concret. Expérimente les méthodes au cœur de ta carrière." data-en="Plan, prioritize and deliver on a real deadline. Experience the methods at the core of your career.">Planifie, priorise et livre dans un délai concret. Expérimente les méthodes au cœur de ta carrière.</p></div>
+    </div>
+    <div class="why-card">
+      <div class="wi"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+      <div><h3 data-fr="Confiance pour le PFE" data-en="Capstone confidence">Confiance pour le PFE</h3><p data-fr="Arrive au Projet de fin d'études avec de l'expérience réelle. Moins de stress, meilleure performance." data-en="Arrive at your capstone with real experience. Less stress, better results.">Arrive au Projet de fin d'études avec de l'expérience réelle. Moins de stress, meilleure performance.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- JOIN -->
+<section class="section join" id="join">
+  <div class="join-grid">
+    <div>
+      <div class="eyebrow" data-fr="Rejoindre" data-en="Join">Rejoindre</div>
+      <div class="join-title" data-fr="Fais partie de l'aventure" data-en="Be part of the adventure">Fais partie de l'aventure</div>
+      <p class="join-desc" style="margin-top:1rem" data-fr="ProjETS est en cours de création. On cherche des étudiants motivés de tous les programmes. Pas besoin d'avoir une idée — juste l'envie de créer quelque chose de concret." data-en="ProjETS is being built. We're looking for motivated students from all programs. No project idea needed — just the desire to build something real.">ProjETS est en cours de création. On cherche des étudiants motivés de tous les programmes. Pas besoin d'avoir une idée — juste l'envie de créer quelque chose de concret.</p>
+    </div>
+    <form class="form" onsubmit="handleForm(event,'joinOk')">
+      <div class="frow">
+        <div class="fg"><label data-fr="Prénom" data-en="First name">Prénom</label><input type="text" placeholder="Alex" required></div>
+        <div class="fg"><label data-fr="Nom" data-en="Last name">Nom</label><input type="text" placeholder="Tremblay" required></div>
+      </div>
+      <div class="fg"><label data-fr="Courriel ÉTS" data-en="ÉTS email">Courriel ÉTS</label><input type="email" placeholder="prenom.nom@etsmtl.ca" required></div>
+      <div class="fg">
+        <label data-fr="Programme" data-en="Program">Programme</label>
+        <select required>
+          <option value="" disabled selected data-fr="Choisir ton programme" data-en="Select your program">Choisir ton programme</option>
+          <option data-fr="Génie logiciel" data-en="Software Engineering">Génie logiciel</option>
+          <option data-fr="Génie des technologies de l'information" data-en="IT Engineering">Génie des technologies de l'information</option>
+          <option data-fr="Génie électrique" data-en="Electrical Engineering">Génie électrique</option>
+          <option data-fr="Génie mécanique" data-en="Mechanical Engineering">Génie mécanique</option>
+          <option data-fr="Génie de la production automatisée" data-en="Automated Production Eng.">Génie de la production automatisée</option>
+          <option data-fr="Génie de la construction" data-en="Construction Engineering">Génie de la construction</option>
+          <option data-fr="Génie des opérations et de la logistique" data-en="Operations &amp; Logistics Eng.">Génie des opérations et de la logistique</option>
+          <option data-fr="Autre" data-en="Other">Autre</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label data-fr="Session actuelle" data-en="Current semester">Session actuelle</label>
+        <select required>
+          <option value="" disabled selected data-fr="Ta session" data-en="Your semester">Ta session</option>
+          <option data-fr="1re–2e session" data-en="1st–2nd semester">1re–2e session</option>
+          <option data-fr="3e–5e session" data-en="3rd–5th semester">3e–5e session</option>
+          <option data-fr="6e session et +" data-en="6th+ semester">6e session et +</option>
+        </select>
+      </div>
+      <button type="submit" class="fsub"><span data-fr="M'inscrire comme membre" data-en="Sign me up">M'inscrire comme membre</span><span>→</span></button>
+      <p class="fnote" data-fr="Tes informations seront utilisées uniquement pour te contacter au sujet de ProjETS." data-en="Your info will only be used to contact you about ProjETS.">Tes informations seront utilisées uniquement pour te contacter au sujet de ProjETS.</p>
+      <div class="fok" id="joinOk" data-fr="✓ Merci ! On te contacte bientôt. Bienvenue dans l'équipe ProjETS !" data-en="✓ Thanks! We'll be in touch soon. Welcome to the ProjETS team!">✓ Merci ! On te contacte bientôt. Bienvenue dans l'équipe ProjETS !</div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="flogo">Proj<b>ETS</b></div>
+  <p data-fr="Club étudiant en formation · ÉTS Montréal" data-en="Student club in formation · ÉTS Montréal">Club étudiant en formation · ÉTS Montréal</p>
+</footer>
+</div><!-- /home -->
+
+<!-- ═══════════ CONTACT ═══════════ -->
+<div class="page" id="page-contact">
+<div class="ct-hero">
+  <div class="eyebrow" data-fr="ProjETS — ÉTS Montréal" data-en="ProjETS — ÉTS Montréal">ProjETS — ÉTS Montréal</div>
+  <h1 data-fr="Contact" data-en="Contact">Contact</h1>
+</div>
+<div class="ct-body">
+  <div class="ct-layout">
+    <div class="ct-info">
+      <div class="eyebrow" data-fr="Nous joindre" data-en="Get in touch">Nous joindre</div>
+      <div class="ct-info-title" style="margin-top:.5rem" data-fr="Tu as une question ?" data-en="Have a question?">Tu as une question ?</div>
+      <p data-fr="Que tu veuilles rejoindre, proposer un partenariat ou simplement en savoir plus, écris-nous." data-en="Whether you want to join, propose a partnership, or learn more, write to us.">Que tu veuilles rejoindre, proposer un partenariat ou simplement en savoir plus, écris-nous.</p>
+      <a class="ch" href="mailto:projets@etsmtl.ca">
+        <div class="ch-ic"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+        <div><div class="ch-lbl" data-fr="Courriel" data-en="Email">Courriel</div><div class="ch-val">projets@etsmtl.ca</div></div>
+      </a>
+      <a class="ch" href="mailto:regiedesclubs@etsmtl.ca">
+        <div class="ch-ic"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+        <div><div class="ch-lbl" data-fr="Régie des clubs ÉTS" data-en="ÉTS Club Office">Régie des clubs ÉTS</div><div class="ch-val">regiedesclubs@etsmtl.ca</div></div>
+      </a>
+      <a class="ch" href="https://www.etsmtl.ca" target="_blank">
+        <div class="ch-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div>
+        <div><div class="ch-lbl">ÉTS Montréal</div><div class="ch-val">etsmtl.ca</div></div>
+      </a>
+    </div>
+    <div class="ct-form-box">
+      <form class="form" onsubmit="handleForm(event,'ctOk')">
+        <div class="frow">
+          <div class="fg"><label data-fr="Prénom" data-en="First name">Prénom</label><input type="text" placeholder="Alex" required></div>
+          <div class="fg"><label data-fr="Nom" data-en="Last name">Nom</label><input type="text" required></div>
+        </div>
+        <div class="fg"><label data-fr="Courriel" data-en="Email">Courriel</label><input type="email" placeholder="ton@courriel.ca" required></div>
+        <div class="fg">
+          <label data-fr="Sujet" data-en="Subject">Sujet</label>
+          <select required>
+            <option value="" disabled selected data-fr="Choisir un sujet" data-en="Choose a subject">Choisir un sujet</option>
+            <option data-fr="Rejoindre le club" data-en="Join the club">Rejoindre le club</option>
+            <option data-fr="Partenariat" data-en="Partnership">Partenariat</option>
+            <option data-fr="Question générale" data-en="General question">Question générale</option>
+            <option data-fr="Autre" data-en="Other">Autre</option>
+          </select>
+        </div>
+        <div class="fg"><label data-fr="Message" data-en="Message">Message</label><textarea placeholder="Ton message..." required></textarea></div>
+        <button type="submit" class="fsub"><span data-fr="Envoyer le message" data-en="Send message">Envoyer le message</span><span>→</span></button>
+        <p class="fnote" data-fr="On te répondra dans les meilleurs délais." data-en="We'll get back to you as soon as possible.">On te répondra dans les meilleurs délais.</p>
+        <div class="fok" id="ctOk" data-fr="✓ Message envoyé ! On te répond bientôt." data-en="✓ Message sent! We'll reply soon.">✓ Message envoyé ! On te répond bientôt.</div>
+      </form>
+    </div>
+  </div>
+</div>
+<footer>
+  <div class="flogo">Proj<b>ETS</b></div>
+  <p data-fr="Club étudiant en formation · ÉTS Montréal" data-en="Student club in formation · ÉTS Montréal">Club étudiant en formation · ÉTS Montréal</p>
+</footer>
+</div><!-- /contact -->
+
+<script>
+let lang='fr';
+
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function later(fn){setTimeout(fn,120);}
+function go(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+
+function toggleMenu(){
+  const b=document.getElementById('burger');
+  const m=document.getElementById('mobileMenu');
+  b.classList.toggle('open');
+  m.classList.toggle('open');
+}
+function closeMenu(){
+  document.getElementById('burger').classList.remove('open');
+  document.getElementById('mobileMenu').classList.remove('open');
+}
+
+function toggleLang(){
+  lang=lang==='fr'?'en':'fr';
+  document.querySelector('.lang').textContent=lang==='fr'?'EN':'FR';
+  document.querySelectorAll('[data-fr]').forEach(el=>{
+    const v=el.getAttribute('data-'+lang);
+    if(!v)return;
+    if((el.tagName==='INPUT'||el.tagName==='TEXTAREA')&&el.type!=='submit')el.placeholder=v;
+    else if(el.tagName==='OPTION')el.textContent=v;
+    else el.innerHTML=v;
+  });
+  document.documentElement.lang=lang;
+}
+
+function handleForm(e,id){
+  e.preventDefault();
+  e.target.querySelector('.fsub').style.display='none';
+  const el=document.getElementById(id);
+  el.style.display='block';
+  el.textContent=el.getAttribute('data-'+lang);
+}
+</script>
+</body>
+</html>
